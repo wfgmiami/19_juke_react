@@ -59,4 +59,10 @@ footer {
     transition: none !important; }
 
 .album img {
-  height: 300px; }
+  height: 300px;
+}
+.album {
+  position:relative;
+  left: 10%;
+  width: inherit
+}
