@@ -72,7 +72,8 @@ export default class Main extends Component{
   }
 
   handleReset(){
-    this.setState( { selectedAlbum : {} })
+    this.setState( { selectedAlbum : {} });
+    this.setState( { currentSong : {} })
   }
 
   startPlaying(songId){
@@ -106,7 +107,7 @@ export default class Main extends Component{
   }
 
   render(){
-    console.log('.....Main this.state',this.state)
+    // console.log('.....Main this.state',this.state)
     return(
       <div id="main" className="container-fluid">
 
