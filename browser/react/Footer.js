@@ -17,10 +17,15 @@ const Footer = ( props ) => {
           <button className="btn btn-default" onClick={ () => props.nextSong(props.currentSong) }>
             <span className="glyphicon glyphicon-step-forward"></span>
           </button>
+          <button className="btn btn-default">
+            <span className="glyphicon glyphicon-random" onClick={ props.playRandom }></span>
+          </button>
+
         </div>
+
         <div className="bar">
-          <div className="progress">
-            <div className="progress-bar" style={{ width: `${progress}%` }}></div>
+          <div className="progress" onClick = { (event) => props.moveProgress(event) }>
+            <div className="progress-bar" style={{ width: `${progress}%` }} ></div>
           </div>
         </div>
       </footer>

@@ -20,7 +20,8 @@ export default class Main extends Component{
       paused: false,
       firstSong: {},
       lastSong: {},
-      progress: {}
+      progress: {},
+      randomSongs: []
     }
     this.handleClick = this.handleClick.bind(this);
     this.handleReset = this.handleReset.bind(this);
@@ -28,6 +29,8 @@ export default class Main extends Component{
     this.togglePlaying = this.togglePlaying.bind(this);
     this.nextSong = this.nextSong.bind(this);
     this.previousSong = this.previousSong.bind(this);
+    this.playRandom = this.playRandom.bind(this);
+    this.moveProgress = this.moveProgress.bind(this);
   }
 
   componentDidMount(){
@@ -38,8 +41,33 @@ export default class Main extends Component{
       });
     });
 
+    document.addEventListener('keydown', (e) => {
+        switch( e.keyCode ){
+          case 32: e.preventDefault(); this.togglePlaying(); break;
+          case 37: this.previousSong( this.state.currentSong ); break;
+          case 39: this.nextSong( this.state.currentSong  ); break;
+        }
+
+    })
+
     audio.addEventListener("ended", () => {
-      const currentSong = this.state.currentSong;
+
+      let currentSong = this.state.currentSong;
+
+      if( this.state.randomSongs.length > 0 ){
+        if( this.state.randomSongs.filter( song => song !== currentSong ).length ){
+
+          this.state.randomSongs = this.state.randomSongs.filter( song => song !== currentSong );
+          console.log('ended.inside if...', this.state.randomSongs)
+        }
+        console.log('ended....', this.state.randomSongs)
+        currentSong = this.state.randomSongs[0] - 1;
+        this.state.randomSongs = this.state.randomSongs.slice(1);
+        if( this.state.randomSongs.length === 0 ){
+          this.playRandom();
+        }
+      }
+
       this.setState( { currentSong } );
       this.nextSong(currentSong);
     })
@@ -106,14 +134,54 @@ export default class Main extends Component{
     this.startPlaying( currentSong );
   }
 
+  playRandom(){
+
+    const randomSongs = [];
+    const totalSongs=this.state.selectedAlbum.songs.length;
+    let count = 0;
+    let arrSongs = [];
+    for(var i = this.state.firstSong; i <= this.state.lastSong; i++ ){
+      arrSongs.push(i);
+    }
+    console.log('....arrSongs', arrSongs)
+    if ( this.state.randomSongs.length > 0 ){
+      this.setState( { randomSongs } );
+    }else{
+      while( count < totalSongs ){
+        let randomNum = Math.floor( Math.random() * totalSongs );
+        let randomSong = arrSongs[ randomNum ];
+
+        while( this.state.randomSongs.filter( song => song === randomSong ).length ){
+          randomNum = Math.floor( Math.random() * totalSongs );
+
+          randomSong = arrSongs[ randomNum ];
+        }
+        this.state.randomSongs.push( randomSong );
+        count++;
+      }
+    }
+  }
+
+  moveProgress(e){
+    const xPos = e.nativeEvent.offsetX;
+
+    const barWidth=document.getElementsByClassName("progress")[0].offsetWidth;
+    console.log('..........xPos', xPos, ".....barWidth" ,barWidth)
+
+    audio.currentTime = audio.duration * xPos / barWidth;
+    this.setState({
+      progress: 100 * xPos / barWidth
+    });
+  }
+
   render(){
-    // console.log('.....Main this.state',this.state)
+    console.log('.....Main this.state',this.state)
     return(
       <div id="main" className="container-fluid">
 
           <Sidebar handleReset={ this.handleReset } />
           { !this.state.selectedAlbum.id ? <Albums albums={ this.state.albums } handleClick = { this.handleClick }/> : <SingleAlbum startPlaying = { this.startPlaying } selectedAlbum={ this.state.selectedAlbum } currentSong = { this.state.currentSong }/> }
-        { !isNaN( this.state.currentSong ) ? <Footer togglePlaying = { this.togglePlaying } currentSong = { this.state.currentSong }  nextSong = { this.nextSong } previousSong={ this.previousSong } progress={ this.state.progress } paused = { this.state.paused }/> : '' }
+        { !isNaN( this.state.currentSong ) ? <Footer togglePlaying = { this.togglePlaying } currentSong = { this.state.currentSong }  nextSong = { this.nextSong } previousSong={ this.previousSong } progress={ this.state.progress } moveProgress = { this.moveProgress } paused = { this.state.paused }  playRandom = { this.playRandom }/> : '' }
 
       </div>
 
